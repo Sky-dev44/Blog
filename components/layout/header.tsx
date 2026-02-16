@@ -3,8 +3,13 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { useSession } from "@/lib/auth-client";
+import UserMenu from "../auth/user-menu";
+import ThemeToggle from "../theme/theme-toggle";
 
 export default function Header() {
+  const { data: session, isPending } = useSession();
+
   const navItems = [
     {
       label: "Home",
@@ -43,11 +48,16 @@ export default function Header() {
           <div className="hidden md:block">
             {/* {keep a placeholder for search} */}
           </div>
-          {/* placeholder for theme toggle */}
+          {/* holder for theme toggle */}
+          <ThemeToggle />
           <div className="flex items-center gap-2">
-            <Button variant={"default"} asChild>
-              <Link href="/auth">Login</Link>
-            </Button>
+            {isPending ? null : session?.user ? (
+              <UserMenu user={session?.user} />
+            ) : (
+              <Button variant={"default"} asChild>
+                <Link href="/auth">Login</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
