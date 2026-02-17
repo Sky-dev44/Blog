@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startTransition, useTransition } from "react";
-import { createPost } from "@/actions/post-actions";
+import { createPost, updatePost } from "@/actions/post-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -29,9 +29,20 @@ const postSchema = z.object({
     .max(255, "Title must be less than 255 characters"),
 });
 
+interface PostFormProps {
+  isEditing?: boolean;
+  post?: {
+    id: number;
+    title: string;
+    description: string;
+    content: string;
+    slug: string;
+  };
+}
+
 type PostFormValues = z.infer<typeof postSchema>;
 
-export default function PostForm() {
+export default function PostForm({ isEditing, post }: PostFormProps) {
   const [isPending, setIsPending] = useTransition();
   const router = useRouter();
 
@@ -41,11 +52,18 @@ export default function PostForm() {
     formState: { errors },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      content: "",
-    },
+    defaultValues:
+      isEditing && post
+        ? {
+            title: post.title,
+            description: post.description,
+            content: post.content,
+          }
+        : {
+            title: "",
+            description: "",
+            content: "",
+          },
   });
 
   const onFormSubmit = async (data: PostFormValues) => {
@@ -58,11 +76,20 @@ export default function PostForm() {
 
         let result;
 
-        result = await createPost(formData);
+        if (isEditing && post) {
+          result = await updatePost(post.id, formData);
+        } else {
+          result = await createPost(formData);
+        }
+
         console.log(result, "res");
 
         if (result.success) {
-          toast("Post created successfully");
+          toast(
+            isEditing
+              ? "Post edited successfully"
+              : "Post created successfully",
+          );
           router.refresh();
           router.push("/");
         } else {
@@ -120,7 +147,11 @@ export default function PostForm() {
       </div>
 
       <Button type="submit" disabled={isPending} className="mt-5 w-full">
-        {isPending ? "Saving Post..." : "Create Post"}
+        {isPending
+          ? "Saving Post..."
+          : isEditing
+            ? "Update Post"
+            : "Create Post"}
       </Button>
     </form>
   );

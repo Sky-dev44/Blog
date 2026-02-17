@@ -1,8 +1,9 @@
+import Container from "@/components/layout/container";
+import PostForm from "@/components/post/post-form";
 import { auth } from "@/lib/auth";
 import { getPostBySlug } from "@/lib/db/queries";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import React from "react";
 
 export default async function EditPostPage({
   params,
@@ -29,5 +30,19 @@ export default async function EditPostPage({
     redirect("/");
   }
 
-  return <div>edit post</div>;
+  return (
+    <Container>
+      <h1 className="max-w-2xl font-bold mb-6 mt-10 text-3xl">Edit Post</h1>
+      <PostForm
+        isEditing={true}
+        post={{
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          content: post.content,
+          slug: post.slug,
+        }}
+      />
+    </Container>
+  );
 }
