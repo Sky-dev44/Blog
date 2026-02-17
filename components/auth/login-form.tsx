@@ -19,8 +19,10 @@ import { useRouter } from "next/navigation";
 
 //schema ->
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "password must be atleast 6 characters long"),
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters long" }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
